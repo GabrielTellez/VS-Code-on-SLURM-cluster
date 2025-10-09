@@ -1,0 +1,30 @@
+# Ignore logs and temporary files
+tunnel_log/
+*.log
+
+# SSH private keys (never commit)
+.ssh/
+*.pem
+id_rsa
+id_rsa.pub
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+env/
+.venv/
+
+# VS Code
+.vscode/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# OneDrive temp files
+~$*
+
+# Ignore large artifacts
+*.tar.gz
+*.zip

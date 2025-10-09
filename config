@@ -1,0 +1,12 @@
+# Read more about SSH config files: https://linux.die.net/man/5/ssh_config
+
+Host gpux
+    ProxyCommand ssh your_cluster_login_node "nc $(squeue --me --name=tunnel_gpux --states=R -h -O NodeList,Comment)"
+    StrictHostKeyChecking no
+    User your_username_here
+
+
+Host nodex
+    ProxyCommand ssh your_cluster_login_node "nc $(squeue --me --name=tunnel_nodex --states=R -h -O NodeList,Comment)"
+    StrictHostKeyChecking no
+    User your_username_here
