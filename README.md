@@ -7,7 +7,7 @@ This document explains how to connect Visual Studio Code on your local machine t
 - Latest VS Code on your local machine.
 - The "Remote Development" extension pack installed in VS Code (ms-vscode-remote.vscode-remote-extensionpack).
 - An account on your SLURM cluster and SSH access.
-- A local SSH key (~/.ssh/id_rsa and ~/.ssh/id_rsa.pub) or generate one with `ssh-keygen -t rsa`.
+- A local SSH key (~/.ssh/id_ed25519 and ~/.ssh/id_ed25519.pub) or generate one with `ssh-keygen -t ed25519`.
 
 ## 1) One-time setup (local ~/.ssh/config and cluster key install)
 
@@ -18,16 +18,29 @@ Use the provided `config` file as a template for your `~/.ssh/config`. Replace `
 2. Generate an SSH key locally if you don't already have one:
 
 ```pwsh
-ssh-keygen -t rsa
+ssh-keygen -t ed25519
 ```
 
 3. Copy your local public key to the cluster (replace the login alias if you renamed it):
 
-```pwsh
+```bash
 ssh-copy-id your_cluster_login_node
 ```
 
+If `ssh-copy-id` is not available, manually append the contents of your local `~/.ssh/id_ed25519.pub` file to `~/.ssh/authorized_keys` on the cluster. Make sure the `.ssh` directory and `authorized_keys` file have proper permissions (`chmod 700 ~/.ssh` and `chmod 600 ~/.ssh/authorized_keys`) on the cluster.
+
 (This installs your public key on the cluster so passwordless auth works for the ProxyCommand connections.)
+
+4. Generate an RSA host key on the cluster for sshd (one-time per cluster):
+
+SSH to the cluster and generate an RSA key pair:
+
+```bash
+ssh your_cluster_login_node
+ssh-keygen -t rsa
+```
+
+This creates `~/.ssh/id_rsa` (private) and `~/.ssh/id_rsa.pub` (public). The SBATCH scripts use this key with the `-h` option when starting `sshd` on compute nodes.
 
 ## 2) Create the SBATCH job script on the cluster
 
@@ -80,7 +93,7 @@ You'll see something like: `node-01,12345` where the second field is the port nu
 
 ## Troubleshooting
 
-- If `ssh-copy-id` fails, you can manually append your `~/.ssh/id_rsa.pub` contents to `~/.ssh/authorized_keys` on the cluster (make sure permissions are correct: `chmod 700 ~/.ssh` and `chmod 600 ~/.ssh/authorized_keys`).
+- If `ssh-copy-id` fails, you can manually append your `~/.ssh/id_ed25519.pub` contents to `~/.ssh/authorized_keys` on the cluster (make sure permissions are correct: `chmod 700 ~/.ssh` and `chmod 600 ~/.ssh/authorized_keys`).
 - Ensure `sshd` exists on the compute nodes and that the path `/usr/sbin/sshd` is correct for your cluster.
 - If the job never enters `R`, check partition and resource requests in the SBATCH script.
 
